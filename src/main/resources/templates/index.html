@@ -1,0 +1,32 @@
+<head>
+    <meta charset="UTF-8">
+    <title>SOOP 알피지</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="header">
+    <h1>🌳 SOOP 알피지</h1>
+    <div>
+        <span class="rank-badge" th:text="${userRank}">등급</span>
+        <span style="font-weight: bold; margin-left: 10px;"
+              th:text="${#numbers.formatInteger(userGold, 3, 'COMMA') + ' G'}">0 G</span>
+    </div>
+</div>
+
+<div class="stock-grid">
+    <div class="stock-card" th:each="s : ${streamers}">
+        <div class="character-circle">🌱</div>
+        <h3 th:text="${s.streamerName}">이름</h3>
+        <p class="rank-badge" th:text="${s.rankName}">등급</p>
+
+        <p class="price" th:text="${#numbers.formatInteger(s.currentPrice, 3, 'COMMA') + ' G'}">0 G</p>
+
+        <p th:class="${s.changeRate > 0 ? 'up' : 'down'}"
+           th:text="${(s.changeRate > 0 ? '▲ ' : '▼ ') + s.changeRate + '%'}">0%</p>
+
+        <p style="font-size: 0.8em; color: #999;" th:text="${'👥 ' + s.currentViewers + '명'}">시청자</p>
+
+        <button class="buy-button">매수</button>
+    </div>
+</div>
+</body>

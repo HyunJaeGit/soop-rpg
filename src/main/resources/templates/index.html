@@ -26,7 +26,23 @@
 
         <p style="font-size: 0.8em; color: #999;" th:text="${'👥 ' + s.currentViewers + '명'}">시청자</p>
 
-        <button class="buy-button">매수</button>
+        <button class="buy-button"
+                th:onclick="'buyStock(' + ${s.id} + ')'">
+            매수하기
+        </button>
     </div>
 </div>
+<div style="margin-top: 50px; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
+    <h2>💼 나의 포트폴리오</h2>
+    <p th:if="${#lists.isEmpty(myStocks)}">보유 중인 주식이 없습니다. 스트리머를 응원해보세요!</p>
+    <ul>
+        <li th:each="stock : ${myStocks}">
+            <strong th:text="${stock.streamerName}">스트리머</strong> :
+            <span th:text="${stock.quantity}">0</span>주 보유
+            (평단가: <span th:text="${stock.averagePrice}">0</span>G)
+        </li>
+    </ul>
+</div>
 </body>
+
+<script th:src="@{/js/game.js}"></script>

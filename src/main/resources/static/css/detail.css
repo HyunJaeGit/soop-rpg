@@ -1,0 +1,113 @@
+/* 상세 페이지 전용 스타일 */
+body {
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.card {
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+.btn-back {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.btn-back:hover {
+    text-decoration: underline;
+}
+
+/* 거래 박스 스타일 */
+.trade-box {
+    margin-top: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #e7f3ff;
+    border: 1px solid #b2d7ff;
+}
+
+.trade-box.sell {
+    background-color: #fff0f0;
+    border: 1px solid #ffb2b2;
+}
+
+input[type="number"] {
+    padding: 10px;
+    width: 100px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 1.1em;
+}
+
+.buy-btn {
+    padding: 10px 25px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.buy-btn:hover {
+    background-color: #0056b3;
+}
+
+.buy-btn.sell {
+    background-color: #dc3545;
+}
+
+.buy-btn.sell:hover {
+    background-color: #a71d2a;
+}
+
+/* 라이브 배지 애니메이션 */
+.live-badge {
+    color: white;
+    background: #ff4d4f;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75em;
+    font-weight: bold;
+    animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+}

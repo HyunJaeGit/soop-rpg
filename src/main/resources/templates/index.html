@@ -16,7 +16,11 @@
 <div class="stock-grid">
     <div class="stock-card" th:each="s : ${streamers}">
         <div class="character-circle">🌱</div>
-        <h3 th:text="${s.streamerName}">이름</h3>
+        <a th:href="@{/detail(id=${s.id})}"
+           th:text="${s.streamerName}"
+           style="text-decoration: none; color: #007bff;">
+            스트리머명
+        </a>
         <p class="rank-badge" th:text="${s.rankName}">등급</p>
 
         <p class="price" th:text="${#numbers.formatInteger(s.currentPrice, 3, 'COMMA') + ' G'}">0 G</p>

@@ -1,6 +1,7 @@
 package com.soop.soop_rpg.controller;
 
-import com.soop.soop_rpg.model.Portfolio;
+import com.soop.soop_rpg.model.Streamer;
+import com.soop.soop_rpg.model.StreamerHistory;
 import com.soop.soop_rpg.model.Wallet;
 import com.soop.soop_rpg.service.StockService;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +22,11 @@ public class GameController {
 
     @GetMapping("/")
     public String index(Model model) {
-        // 1. 지갑 정보 가져오기 (Service 이용)
-        Wallet wallet = stockService.getWallet();
+        // 0. 메인 페이지 로딩 시 주가 새로고침
+        stockService.refreshStockPrices();
 
+        // 1. 지갑 정보 가져오기
+        Wallet wallet = stockService.getWallet();
         if (wallet == null) {
             model.addAttribute("userRank", "데이터 로딩 중...");
             model.addAttribute("userGold", 0);
@@ -41,13 +44,41 @@ public class GameController {
         return "index";
     }
 
-    // 매수 기능
+    /**
+     * 매수 기능 통합 (중복 제거됨)
+     * - 메인 페이지에서 클릭 시: quantity가 없으므로 기본값 1주 매수
+     * - 상세 페이지에서 클릭 시: 입력한 quantity만큼 매수
+     */
     @PostMapping("/buy")
     @ResponseBody
-    public String buyStock(@RequestParam("streamerId") Long streamerId) {
-        boolean success = stockService.buyStock(streamerId);
+    public String buyStock(@RequestParam("streamerId") Long streamerId,
+                           @RequestParam(value = "quantity", defaultValue = "1") int quantity) {
+        boolean success = stockService.buyStock(streamerId, quantity);
         return success ? "success" : "fail";
     }
 
+    // 해당 스트리머 상세 조회 기능
+    @GetMapping("/detail")
+    public String detail(@RequestParam("id") Long id, Model model) {
+        // 1. 해당 스트리머 정보 가져오기
+        Streamer streamer = stockService.getStreamerById(id);
+
+        // 2. 그래프를 그릴 히스토리 데이터 가져오기
+        List<StreamerHistory> history = stockService.getStockHistory(id);
+
+        model.addAttribute("streamer", streamer);
+        model.addAttribute("history", history);
+
+        return "detail";
+    }
+
+    // 매도 요청을 받는 주소
+    @PostMapping("/sell")
+    @ResponseBody
+    public String sellStock(@RequestParam("streamerId") Long streamerId,
+                            @RequestParam(value = "quantity", defaultValue = "1") int quantity) {
+        boolean success = stockService.sellStock(streamerId, quantity);
+        return success ? "success" : "fail";
+    }
 
 }

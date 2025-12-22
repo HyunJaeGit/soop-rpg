@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상세 정보 - SOOP 알피지</title>
+    <!-- 그래프 그리는 JS 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/detail.css}">
+</head>
+<body>
+
+<div class="container">
+    <a href="/" class="btn-back">← 메인 거래소로 돌아가기</a>
+
+    <div class="header">
+        <div>
+            <span class="live-badge">LIVE</span>
+            <h1 style="margin: 5px 0;" th:text="${streamer.streamerName} + ' 정보'">스트리머 이름</h1>
+            <p style="color: #666;" th:text="${streamer.rankName} + ' 등급'">등급</p>
+        </div>
+        <div style="text-align: right;">
+            <p style="font-size: 0.9em; color: #888;">현재가</p>
+            <h2 style="color: #007bff; margin: 0;" th:text="${#numbers.formatInteger(streamer.currentPrice, 3, 'COMMA') + ' G'}">0 G</h2>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="card">
+            <h3>📈 시각적 변동 추이</h3>
+            <div id="chart"></div> </div>
+        <div class="card">
+            <h3>📊 방송 통계</h3>
+            <p>현재 시청자: <strong th:text="${streamer.currentViewers}">0</strong> 명</p>
+            <p>주간 평균 시청자: <strong th:text="${streamer.currentViewers}">0</strong> 명 (준비 중)</p>
+
+            <div class="trade-box">
+                <h4>주식 매수하기</h4>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="buyQuantity" value="1" min="1">
+                    <button class="buy-btn" onclick="handleTrade('buy')">매수</button>
+                </div>
+                <div class="trade-box" style="background-color: #fff0f0; border: 1px solid #ffb2b2; margin-top: 15px;">
+                    <h4>주식 매도하기</h4>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="sellQuantity" value="1" min="1">
+                        <button class="buy-btn" style="background-color: #dc3545;" onclick="handleTrade('sell')">매도</button>
+                    </div>
+                </div>
+                <p style="font-size: 0.8em; color: #555; margin-top: 10px;">
+                    * 총 결제 예정 금액: <span id="totalPrice" th:text="${streamer.currentPrice}">0</span> G
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/detail.js"></script>
+
+<script th:inline="javascript">
+    /* 타임리프 데이터를 자바스크립트 변수로 안전하게 전달 */
+    const historyData = /*[[${history}]]*/ [];
+    const currentPrice = [[${streamer.currentPrice}]];
+    const streamerId = [[${streamer.id}]];
+
+    // 페이지 로드 시 초기화 실행
+    document.addEventListener('DOMContentLoaded', function() {
+        initChart(historyData);
+        initPriceCalculator(currentPrice);
+    });
+
+    // 버튼 클릭 이벤트 연결용 래퍼 함수
+    function handleTrade(type) {
+        trade(type, streamerId);
+    }
+</script>
+
+</body>
+</html>

@@ -1,52 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>SOOP 알피지</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="header">
-    <h1>🌳 SOOP 알피지</h1>
-    <div>
-        <span class="rank-badge" th:text="${userRank}">등급</span>
-        <span style="font-weight: bold; margin-left: 10px;"
-              th:text="${#numbers.formatInteger(userGold, 3, 'COMMA') + ' G'}">0 G</span>
+
+<!-- 헤더 상태창 -->
+<div class="user-status-bar">
+    <div class="logo-area">
+        <h1 style="margin:0; font-size: 1.4em;">🌳 SOOP 알피지</h1>
+    </div>
+
+    <div class="user-profile-group">
+        <div class="avatar-container">
+            <img id="user-avatar" src="/image/avatars/rank_1.png" alt="아바타" class="avatar-img">
+        </div>
+        <div class="user-data">
+            <span id="user-rank-badge" class="rank-badge">건빵</span>
+            <div class="asset-display">
+                <span id="wallet-balance" th:text="${#numbers.formatInteger(wallet.balance, 0, 'COMMA')}">0</span> G
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="stock-grid">
-    <div class="stock-card" th:each="s : ${streamers}">
-        <div class="character-circle">🌱</div>
-        <a th:href="@{/detail(id=${s.id})}"
-           th:text="${s.streamerName}"
-           style="text-decoration: none; color: #007bff;">
-            스트리머명
-        </a>
-        <p class="rank-badge" th:text="${s.rankName}">등급</p>
+<!-- 전체 스트리머 목록 -->
+<div class="main-content">
+    <div class="stock-grid">
+        <div class="stock-card" th:each="s : ${streamers}"
+             th:onclick="|location.href='@{/detail(id=${s.id})}'|"
+             style="cursor: pointer;">
 
-        <p class="price" th:text="${#numbers.formatInteger(s.currentPrice, 3, 'COMMA') + ' G'}">0 G</p>
+            <div class="character-circle">🌱</div>
 
-        <p th:class="${s.changeRate > 0 ? 'up' : 'down'}"
-           th:text="${(s.changeRate > 0 ? '▲ ' : '▼ ') + s.changeRate + '%'}">0%</p>
+            <div style="text-decoration: none; color: #007bff; font-weight: bold; font-size: 1.1em; margin-bottom: 5px;"
+                 th:text="${s.streamerName}">
+                스트리머명
+            </div>
 
-        <p style="font-size: 0.8em; color: #999;" th:text="${'👥 ' + s.currentViewers + '명'}">시청자</p>
+            <p class="rank-badge" th:text="${s.rankName}">등급</p>
 
-        <button class="buy-button"
-                th:onclick="'buyStock(' + ${s.id} + ')'">
-            매수하기
-        </button>
+            <p class="price" th:text="${#numbers.formatInteger(s.currentPrice, 0, 'COMMA') + ' G'}">0 G</p>
+
+            <p th:class="${s.changeRate > 0 ? 'up' : 'down'}"
+               th:text="${(s.changeRate > 0 ? '▲ ' : '▼ ') + s.changeRate + '%'}">0%</p>
+
+            <p style="font-size: 0.8em; color: #999; margin-top: 10px;" th:text="${'👥 ' + s.currentViewers + '명'}">시청자</p>
+
+        </div>
+    </div>
+
+</div>
+
+    <hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div id="portfolio-section" style="padding: 20px; background-color: #f1f8ff; border-radius: 15px;">
+        <h2 style="color: #333;">💼 나의 포트폴리오</h2>
+        <p th:if="${#lists.isEmpty(portfolio)}" style="text-align: center; color: #777; padding: 20px;">
+            보유 중인 주식이 없습니다. 스트리머를 응원해보세요! 🌱
+        </p>
+
+        <div class="portfolio-list" th:if="${!#lists.isEmpty(portfolio)}">
+            <div th:each="p : ${portfolio}"
+                 style="background: white; margin-bottom: 10px; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <div>
+                    <strong style="font-size: 1.1em; color: #007bff;" th:text="${p.streamerName}">스트리머</strong>
+                    <span style="color: #888; font-size: 0.9em; margin-left: 10px;" th:text="'수량: ' + ${p.quantity} + '주'">0주</span>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.8em; color: #999;">평단가</div>
+                    <div style="font-weight: bold;" th:text="${#numbers.formatInteger(p.averagePrice, 0, 'COMMA') + ' G'}">0 G</div>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
-<div style="margin-top: 50px; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
-    <h2>💼 나의 포트폴리오</h2>
-    <p th:if="${#lists.isEmpty(myStocks)}">보유 중인 주식이 없습니다. 스트리머를 응원해보세요!</p>
-    <ul>
-        <li th:each="stock : ${myStocks}">
-            <strong th:text="${stock.streamerName}">스트리머</strong> :
-            <span th:text="${stock.quantity}">0</span>주 보유
-            (평단가: <span th:text="${stock.averagePrice}">0</span>G)
-        </li>
-    </ul>
-</div>
-</body>
 
 <script th:src="@{/js/game.js}"></script>
+<script>
+    // 페이지 로드 시 등급과 아바타를 즉시 계산해서 업데이트
+    document.addEventListener('DOMContentLoaded', function() {
+        // game.js에 작성한 함수 호출 (총 자산 기반)
+        if (typeof refreshUserRank === 'function') {
+            refreshUserRank();
+        } else if (typeof updateRankUI === 'function') {
+            updateRankUI();
+        }
+    });
+</script>
+
+</body>
+</html>

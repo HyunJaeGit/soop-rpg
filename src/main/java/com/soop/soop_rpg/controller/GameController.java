@@ -22,24 +22,16 @@ public class GameController {
 
     @GetMapping("/")
     public String index(Model model) {
-        // 0. 메인 페이지 로딩 시 주가 새로고침
-        stockService.refreshStockPrices();
-
-        // 1. 지갑 정보 가져오기
         Wallet wallet = stockService.getWallet();
+        // 지갑이 없으면 기본값을 가진 객체를 생성해서 넘김 (에러 방지)
         if (wallet == null) {
-            model.addAttribute("userRank", "데이터 로딩 중...");
-            model.addAttribute("userGold", 0);
-        } else {
-            model.addAttribute("userRank", wallet.getUserRank());
-            model.addAttribute("userGold", wallet.getBalance());
+            wallet = new Wallet();
+            wallet.setBalance(0L);
+            wallet.setUserRank("건빵");
         }
-
-        // 2. 스트리머 목록 가져오기
-        model.addAttribute("streamers", stockService.getTop100Streamers());
-
-        // 3. 내 포트폴리오(산 주식) 목록 가져오기
-        model.addAttribute("myStocks", stockService.getMyPortfolio());
+        model.addAttribute("wallet", wallet);
+        model.addAttribute("streamers", stockService.getTopStreamers());
+        model.addAttribute("portfolio", stockService.getMyPortfolio());
 
         return "index";
     }

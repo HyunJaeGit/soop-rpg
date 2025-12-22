@@ -1,7 +1,9 @@
 package com.soop.soop_rpg.config;
 
 import com.soop.soop_rpg.model.Streamer;
+import com.soop.soop_rpg.model.Wallet;
 import com.soop.soop_rpg.repository.StreamerRepository;
+import com.soop.soop_rpg.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,7 @@ import java.util.Random;
 public class DataInitializer implements CommandLineRunner {
 
     private final StreamerRepository streamerRepository;
+    private final WalletRepository walletRepository; // [추가] 필드 선언 (final 필수)
 
     @Override
     public void run(String... args) {
@@ -35,6 +38,11 @@ public class DataInitializer implements CommandLineRunner {
                 ));
             }
             System.out.println("✅ 100명의 스트리머 데이터가 DB에 저장되었습니다.");
+        }
+
+        if (walletRepository.count() == 0) {
+            walletRepository.save(new Wallet(1000000L, "새싹 투자자"));
+            System.out.println("✅ 초기 자본금 1,000,000G가 지급되었습니다.");
         }
     }
 }

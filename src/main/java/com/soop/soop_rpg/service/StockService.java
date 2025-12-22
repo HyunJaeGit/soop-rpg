@@ -16,6 +16,7 @@ public class StockService {
     public List<StreamerStockDto> getTop100Streamers() {
         return streamerRepository.findAll().stream()
                 .map(s -> new StreamerStockDto(
+                        s.getId(), // [수정] ID 추가
                         s.getStreamerName(),
                         s.getCurrentViewers(),
                         (long) s.getCurrentPrice(),

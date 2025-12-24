@@ -3,41 +3,31 @@
  */
 function initChart(historyData) {
     if (!historyData || historyData.length === 0) {
-        document.querySelector("#chart").innerHTML = "<p style='padding:20px; color:#999;'>아직 충분한 데이터가 쌓이지 않았습니다. (1분만 기다려주세요!)</p>";
+        const chartElement = document.querySelector("#chart");
+        if(chartElement) chartElement.innerHTML = "<p style='padding:20px; color:#999;'>아직 충분한 데이터가 쌓이지 않았습니다. (1분만 기다려주세요!)</p>";
         return;
     }
 
-    // 1. 그래프에 표시할 가격과 시간 데이터를 추출합니다.
-    const prices = historyData.map(item => item.price);
-    const times = historyData.map(item => {
+    // 최신 데이터가 오른쪽으로 오도록 정렬 (기존 데이터가 Descending일 경우 대비)
+    const sortedData = [...historyData].sort((a, b) => new Date(a.recordedAt) - new Date(b.recordedAt));
+
+    const prices = sortedData.map(item => item.price);
+    const times = sortedData.map(item => {
         const date = new Date(item.recordedAt);
-        return date.getHours() + ":" + date.getMinutes(); // "14:30" 형태로 표시
+        return date.getHours() + ":" + String(date.getMinutes()).padStart(2, '0');
     });
 
-    // 2. ApexCharts 설정 옵션
     const options = {
-        series: [{
-            name: '주가',
-            data: prices
-        }],
-        chart: {
-            type: 'area', // 영역 차트로 더 예쁘게 표시
-            height: 300,
-            zoom: { enabled: false },
-            toolbar: { show: false }
-        },
+        series: [{ name: '주가', data: prices }],
+        chart: { type: 'area', height: 300, zoom: { enabled: false }, toolbar: { show: false } },
         dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 3 }, // 부드러운 곡선
+        stroke: { curve: 'smooth', width: 3 },
         xaxis: { categories: times },
-        yaxis: { labels: { formatter: (val) => val.toLocaleString() + " G" } },
-        colors: ['#007bff'], // 메인 테마색
-        fill: {
-            type: 'gradient',
-            gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.9 }
-        }
+        yaxis: { labels: { formatter: (val) => Math.floor(val).toLocaleString() + " G" } },
+        colors: ['#007bff'],
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.3 } }
     };
 
-    // 3. 차트 렌더링
     const chart = new ApexCharts(document.querySelector("#chart"), options);
     chart.render();
 }
@@ -47,25 +37,49 @@ function initChart(historyData) {
  */
 function initPriceCalculator(currentPrice) {
     const buyInput = document.getElementById('buyQuantity');
-    const sellInput = document.getElementById('sellQuantity');
     const totalPriceDisplay = document.getElementById('totalPrice');
 
-    function updatePrice(e) {
-        const quantity = e.target.value;
-        totalPriceDisplay.innerText = (quantity * currentPrice).toLocaleString();
+    if(buyInput && totalPriceDisplay) {
+        buyInput.addEventListener('input', (e) => {
+            const quantity = parseInt(e.target.value) || 0;
+            totalPriceDisplay.innerText = (quantity * currentPrice).toLocaleString();
+        });
     }
-
-    if(buyInput) buyInput.addEventListener('input', updatePrice);
-    if(sellInput) sellInput.addEventListener('input', updatePrice);
 }
 
 /**
- * [함수 역할]: 매수/매도 버튼을 눌렀을 때 실행될 로직 (추후 3단계에서 서버와 연동)
+ * [함수 역할]: 매수/매도 버튼을 눌렀을 때 서버의 TradeController와 통신합니다.
  */
 function trade(type, streamerId) {
-    const quantity = (type === 'buy')
-        ? document.getElementById('buyQuantity').value
-        : document.getElementById('sellQuantity').value;
+    const quantityInput = document.getElementById(type === 'buy' ? 'buyQuantity' : 'sellQuantity');
+    const quantity = parseInt(quantityInput.value);
 
-    alert(type + " 요청: " + streamerId + "번 스트리머 주식 " + quantity + "주\n(거래 시스템은 3단계에서 구현됩니다!)");
+    if (isNaN(quantity) || quantity <= 0) {
+        alert("올바른 수량을 입력해주세요.");
+        return;
+    }
+
+    // 서버 API 호출
+    fetch('/api/trade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            type: type,
+            id: streamerId,
+            quantity: quantity
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload(); // 성공 시 페이지 새로고침하여 잔액/포트폴리오 갱신
+        } else {
+            alert("거래 실패: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("서버 통신 중 에러가 발생했습니다.");
+    });
 }

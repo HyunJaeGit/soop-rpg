@@ -16,13 +16,17 @@ public class WalletService {
     private final WalletRepository walletRepository;
 
     /**
-     * [메서드 역할]: 현재 사용자의 지갑 정보를 가져옵니다.
-     * (현재는 로그인이 없으므로 ID가 1번인 지갑을 기본으로 사용합니다.)
+     * [메서드 역할]: 내 지갑 정보를 가져옵니다. 없으면 기본 지갑을 생성합니다.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public Wallet getMyWallet() {
-        return walletRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("지갑을 찾을 수 없습니다."));
+        // ID 1번 지갑을 찾고, 없으면 새로 만들어서 저장함 (초기 자금 100만G)
+        return walletRepository.findById(1L).orElseGet(() -> {
+            Wallet newWallet = new Wallet();
+            newWallet.setBalance(1000000L); // 초기 자금
+            newWallet.setUserRank("건빵");
+            return walletRepository.save(newWallet);
+        });
     }
 
     /**

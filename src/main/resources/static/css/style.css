@@ -2,70 +2,49 @@
 body {
     background-color: #f5f7f9;
     margin: 0;
-    padding: 0;
+    /* [수정] 좌우 5% 여백을 주어 모든 요소가 벽에서 떨어지게 합니다. */
+    padding: 0 5%;
     font-family: 'Pretendard', -apple-system, sans-serif;
+    /* 내부 요소들이 중앙에 정렬되도록 도와줍니다. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* 2. 상단 유저 상태바 (Sticky & Glassmorphism 적용) */
-.user-status-bar {
+/* [추가] 공통 컨테이너 및 상태바 설정 */
+/* 모든 주요 박스의 최대 너비를 1000px로 통일하여 정렬을 맞춥니다. */
+.user-status-bar, .container, .main-content {
+    width: 100%;
     max-width: 1000px;
-    margin: 15px auto;
+    box-sizing: border-box;
+}
+
+/* 2. 상단 유저 상태바 */
+.user-status-bar {
+    margin: 15px 0; /* 중앙 정렬은 body의 align-items가 처리하므로 auto를 뺍니다. */
     padding: 10px 25px;
     display: flex;
-    justify-content: space-between; /* 양 끝으로 벌림 */
+    justify-content: space-between;
     align-items: center;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 20px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-/* 우측 정보 그룹 */
-.user-profile-group {
-    display: flex;
-    align-items: center;
-    gap: 15px; /* 아바타와 텍스트 사이 간격 */
-}
-
-/* 아바타 크기 대폭 축소 */
-.avatar-container {
-    width: 50px;
-    height: 50px;
-    overflow: hidden;
-    border-radius: 50%;
-    background: #f0f0f0;
-    border: 2px solid #818cf8;
-}
-
-.avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* 텍스트 우측 정렬 */
-.user-data {
-    text-align: right;
-}
-
-.asset-display {
-    font-weight: bold;
-    font-size: 1.1em;
-    color: #4f46e5;
-    margin-top: 2px;
-}
-
 /* 3. 메인 콘텐츠 컨테이너 */
+.container {
+    margin-bottom: 30px;
+}
+
 .main-content {
-    max-width: 1000px;
     margin: 0 auto 50px;
-    padding: 0 20px;
-    box-sizing: border-box;
+    padding: 0; /* body에서 여백을 줬으므로 여기선 0으로 바꿉니다. */
 }
 
 /* 4. 주식 리스트 그리드 */
 .stock-grid {
     display: grid;
-    /* 카드가 너무 커지지 않도록 220px로 조정 */
+    /* 화면 크기에 맞춰 카드를 배치합니다. */
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
     padding: 20px 0;
@@ -80,16 +59,17 @@ body {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     text-align: center;
     border: 1px solid #f0f0f0;
-    cursor: pointer; /* 마우스 커서가 손가락 모양으로 변경 */
-    user-select: none; /* 글자 드래그 방지 (게임 버튼 느낌) */
+    cursor: pointer;
+    user-select: none;
 }
 
 .stock-card:hover {
-    transform: translateY(-8px); /* 조금 더 경쾌하게 위로 뜸 */
+    transform: translateY(-8px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
+
 .stock-card:active {
-    transform: scale(0.95); /* 클릭하는 순간 살짝 눌리는 느낌 추가 */
+    transform: scale(0.95);
     transition: transform 0.1s;
 }
 
@@ -132,19 +112,38 @@ body {
 .up { color: #ef4444; font-weight: bold; font-size: 0.9em; }
 .down { color: #3b82f6; font-weight: bold; font-size: 0.9em; }
 
-.buy-button {
-    margin-top: 15px;
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    background: #4f46e5;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
+/* 8. 기타 정보 그룹 및 아바타 */
+.user-profile-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-.buy-button:hover {
-    background: #3730a3;
+.avatar-container {
+    width: 50px;
+    height: 50px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #f0f0f0;
+    border: 2px solid #818cf8;
 }
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-data {
+    text-align: right;
+}
+
+.asset-display {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #4f46e5;
+    margin-top: 2px;
+}
+
+/* 데이터가 텍스트로 노출될 경우를 대비한 방어 코드 */
+body > [text] { display: none !important; }

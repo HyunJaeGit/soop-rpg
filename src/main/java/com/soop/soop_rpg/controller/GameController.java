@@ -2,75 +2,60 @@ package com.soop.soop_rpg.controller;
 
 import com.soop.soop_rpg.model.Streamer;
 import com.soop.soop_rpg.model.StreamerHistory;
-import com.soop.soop_rpg.model.Wallet;
-import com.soop.soop_rpg.service.StockService;
+import com.soop.soop_rpg.repository.PortfolioRepository;
+import com.soop.soop_rpg.repository.StreamerHistoryRepository;
+import com.soop.soop_rpg.repository.StreamerRepository;
+import com.soop.soop_rpg.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
+/**
+ * [클래스 역할]: 게임의 메인 화면과 상세 화면 연결을 담당하는 메인 컨트롤러입니다.
+ * 중복되었던 MarketController와 StreamerController의 기능을 통합했습니다.
+ */
 @Controller
 @RequiredArgsConstructor
 public class GameController {
 
-    private final StockService stockService;
+    private final StreamerRepository streamerRepository;
+    private final StreamerHistoryRepository historyRepository;
+    private final WalletService walletService;
+    private final PortfolioRepository portfolioRepository;
 
+    /**
+     * [메서드]: 메인 페이지 (/)
+     * 스트리머 목록, 내 지갑, 내 포트폴리오 정보를 한 번에 보여줍니다.
+     */
     @GetMapping("/")
     public String index(Model model) {
-        Wallet wallet = stockService.getWallet();
-        // 지갑이 없으면 기본값을 가진 객체를 생성해서 넘김 (에러 방지)
-        if (wallet == null) {
-            wallet = new Wallet();
-            wallet.setBalance(0L);
-            wallet.setUserRank("건빵");
-        }
-        model.addAttribute("wallet", wallet);
-        model.addAttribute("streamers", stockService.getTopStreamers());
-        model.addAttribute("portfolio", stockService.getMyPortfolio());
-
+        model.addAttribute("streamers", streamerRepository.findAll());
+        model.addAttribute("wallet", walletService.getMyWallet());
+        model.addAttribute("portfolio", portfolioRepository.findAll());
         return "index";
     }
 
     /**
-     * 매수 기능 통합 (중복 제거됨)
-     * - 메인 페이지에서 클릭 시: quantity가 없으므로 기본값 1주 매수
-     * - 상세 페이지에서 클릭 시: 입력한 quantity만큼 매수
+     * [메서드]: 상세 페이지 (/detail/{id})
+     * 특정 스트리머의 현재 정보와 가격 히스토리(그래프용)를 보여줍니다.
      */
-    @PostMapping("/buy")
-    @ResponseBody
-    public String buyStock(@RequestParam("streamerId") Long streamerId,
-                           @RequestParam(value = "quantity", defaultValue = "1") int quantity) {
-        boolean success = stockService.buyStock(streamerId, quantity);
-        return success ? "success" : "fail";
-    }
+    @GetMapping("/detail/{id}")
+    public String detail(@PathVariable("id") Long id, Model model) {
+        // 1. 스트리머 기본 정보 조회
+        Streamer streamer = streamerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 스트리머입니다. ID: " + id));
 
-    // 해당 스트리머 상세 조회 기능
-    @GetMapping("/detail")
-    public String detail(@RequestParam("id") Long id, Model model) {
-        // 1. 해당 스트리머 정보 가져오기
-        Streamer streamer = stockService.getStreamerById(id);
-
-        // 2. 그래프를 그릴 히스토리 데이터 가져오기
-        List<StreamerHistory> history = stockService.getStockHistory(id);
+        // 2. 그래프를 위한 가격 히스토리 조회
+        List<StreamerHistory> history = historyRepository.findByStreamerIdOrderByRecordedAtAsc(id);
 
         model.addAttribute("streamer", streamer);
         model.addAttribute("history", history);
+        model.addAttribute("wallet", walletService.getMyWallet());
 
         return "detail";
     }
-
-    // 매도 요청을 받는 주소
-    @PostMapping("/sell")
-    @ResponseBody
-    public String sellStock(@RequestParam("streamerId") Long streamerId,
-                            @RequestParam(value = "quantity", defaultValue = "1") int quantity) {
-        boolean success = stockService.sellStock(streamerId, quantity);
-        return success ? "success" : "fail";
-    }
-
 }

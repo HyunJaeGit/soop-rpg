@@ -3,12 +3,17 @@ package com.soop.soop_rpg.repository;
 import com.soop.soop_rpg.model.StreamerHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 
 /**
- * [클래스 역할]: 스트리머의 과거 기록(주가, 시청자 수)을 DB에 저장하고 꺼내오는 도구입니다.
- * JpaRepository를 상속받으면 count(), save(), findAll() 같은 메서드를 공짜로 쓸 수 있습니다.
+ * [클래스 역할]: 스트리머의 기록들을 DB에서 조회하는 도구입니다.
  */
-@Repository // 이 인터페이스가 DB와 소통하는 저장소임을 선언합니다.
+@Repository
 public interface StreamerHistoryRepository extends JpaRepository<StreamerHistory, Long> {
-    // count() 메서드는 JpaRepository가 기본적으로 제공하므로 따로 적지 않아도 됩니다.
+
+    /**
+     * [메서드 역할]: 특정 스트리머의 ID를 기준으로 모든 기록을 시간 순(Ascending, 오름차순)으로 가져옵니다.
+     * JPA 규칙: findBy + 필드명(StreamerId) + OrderBy + 정렬기준(RecordedAt) + 방식(Asc)
+     */
+    List<StreamerHistory> findByStreamerIdOrderByRecordedAtAsc(Long streamerId);
 }
